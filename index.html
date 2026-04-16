@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo de Jardín Alicia</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f7f0;
+      color: #2d4a2d;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #2e7d32, #66bb6a);
+      color: white;
+      padding: 28px 20px 20px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      font-size: 2rem;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    header p {
+      font-size: 1rem;
+      opacity: 0.85;
+    }
+
+    /* ── CONTROLES ── */
+    .controles {
+      max-width: 1100px;
+      margin: 24px auto 16px;
+      padding: 0 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .buscador {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      font-size: 1.05rem;
+      border: 2px solid #a5d6a7;
+      border-radius: 10px;
+      outline: none;
+      background: white;
+      color: #2d4a2d;
+      transition: border-color 0.2s;
+    }
+    .buscador:focus { border-color: #2e7d32; }
+
+    .filtros {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-filtro {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: 2px solid #a5d6a7;
+      border-radius: 10px;
+      background: white;
+      color: #2e7d32;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-filtro:hover { background: #e8f5e9; }
+    .btn-filtro.activo {
+      background: #2e7d32;
+      color: white;
+      border-color: #2e7d32;
+    }
+
+    /* ── CONTADOR ── */
+    .contador {
+      max-width: 1100px;
+      margin: 0 auto 12px;
+      padding: 0 16px;
+      font-size: 0.95rem;
+      color: #558b2f;
+    }
+
+    /* ── GRID ── */
+    .galeria {
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── TARJETA ── */
+    .tarjeta {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .tarjeta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .tarjeta-foto {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: #e8f5e9;
+      display: block;
+    }
+
+    .tarjeta-placeholder {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(135deg, #c8e6c9, #e8f5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+
+    .tarjeta-info {
+      padding: 14px 16px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tarjeta-nombre {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1b5e20;
+      line-height: 1.3;
+    }
+
+    .tarjeta-precio {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #2e7d32;
+    }
+
+    .tarjeta-categoria {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      align-self: flex-start;
+    }
+    .cat-flores    { background: #fce4ec; color: #880e4f; }
+    .cat-tejidos   { background: #fff3e0; color: #e65100; }
+    .cat-otro      { background: #e8f5e9; color: #1b5e20; }
+
+    .tarjeta-fecha {
+      font-size: 0.78rem;
+      color: #9e9e9e;
+      margin-top: 4px;
+    }
+
+    /* ── VACÍO / ERROR ── */
+    .mensaje-central {
+      text-align: center;
+      padding: 60px 20px;
+      color: #558b2f;
+      font-size: 1.15rem;
+      grid-column: 1 / -1;
+    }
+    .mensaje-central span { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.88rem;
+      color: #81c784;
+      border-top: 1px solid #c8e6c9;
+      background: #f0f7f0;
+    }
+
+    /* ── CURSOR ZOOM ── */
+    .tarjeta-imagen { cursor: zoom-in; position: relative; }
+    .tarjeta-imagen::after {
+      content: '🔍';
+      position: absolute;
+      bottom: 8px; right: 10px;
+      font-size: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .tarjeta-imagen:hover::after { opacity: 1; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.visible { display: flex; }
+
+    .modal-caja {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-cerrar {
+      position: absolute;
+      top: 10px; right: 12px;
+      background: rgba(0,0,0,0.55);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      transition: background 0.2s;
+    }
+    .modal-cerrar:hover { background: rgba(0,0,0,0.8); }
+
+    .modal-foto {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      background: #111;
+      display: block;
+    }
+
+    .modal-info {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .modal-nombre { font-size: 1.3rem; font-weight: 700; color: #1b5e20; }
+    .modal-precio { font-size: 1.4rem; font-weight: 800; color: #2e7d32; }
+    .modal-cat    { font-size: 0.9rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.5rem; }
+      .galeria { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+      .tarjeta-nombre { font-size: 1rem; }
+      .tarjeta-precio { font-size: 1.1rem; }
+      .btn-filtro { padding: 8px 14px; font-size: 0.92rem; }
+      .modal-foto { max-height: 55vh; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Catálogo de Jardín Alicia</h1>
+  <p>Flores y tejidos artesanales</p>
+</header>
+
+<div class="controles">
+  <input
+    class="buscador"
+    type="search"
+    id="buscador"
+    placeholder="🔍  Buscar producto..."
+    oninput="filtrar()"
+  />
+  <div class="filtros">
+    <button class="btn-filtro activo" onclick="setFiltro('todos', this)">Todos</button>
+    <button class="btn-filtro" onclick="setFiltro('Flores', this)">🌸 Flores</button>
+    <button class="btn-filtro" onclick="setFiltro('Tejidos', this)">🧶 Tejidos</button>
+  </div>
+</div>
+
+<div class="contador" id="contador"></div>
+
+<div class="galeria" id="galeria">
+  <div class="mensaje-central"><span>⏳</span>Cargando productos...</div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
+  <div class="modal-caja">
+    <button class="modal-cerrar" onclick="cerrarModal()">✕</button>
+    <img class="modal-foto" id="modal-foto" src="" alt="" />
+    <div class="modal-info">
+      <div class="modal-nombre" id="modal-nombre"></div>
+      <div class="modal-precio" id="modal-precio"></div>
+      <span class="tarjeta-categoria modal-cat" id="modal-cat"></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Jardín Alicia &nbsp;·&nbsp; Presiona F5 para ver los últimos productos
+</footer>
+
+<script>
+  let todos = [];
+  let filtroActivo = 'todos';
+
+  // ── Normaliza productos: soporta formato viejo y nuevo ──
+  function normalizar(p) {
+    const fotoVieja = p.foto || extraerNombreFoto(p.foto_path) || '';
+    return {
+      id:         p.id         || 0,
+      nombre:     p.nombre     || p.descripcion || 'Sin nombre',
+      precio:     p.precio     || '—',
+      categoria:  normalizeCategoria(p.categoria || ''),
+      foto_thumb: p.foto_thumb || fotoVieja,   // miniatura (o única foto vieja)
+      foto_full:  p.foto_full  || fotoVieja,   // original (o única foto vieja)
+      fecha:      p.fecha      || '',
+    };
+  }
+
+  function normalizeCategoria(cat) {
+    const c = cat.toLowerCase();
+    if (c.includes('flor'))  return 'Flores';
+    if (c.includes('tejid')) return 'Tejidos';
+    return cat || 'Otro';
+  }
+
+  function extraerNombreFoto(ruta) {
+    if (!ruta) return '';
+    return ruta.split(/[\\/]/).pop();
+  }
+
+  function formatPrecio(valor) {
+    const n = parseInt(valor, 10);
+    if (isNaN(n)) return valor;
+    return '$' + n.toLocaleString('es-CL');
+  }
+
+  function claseCategoria(cat) {
+    if (cat === 'Flores')  return 'cat-flores';
+    if (cat === 'Tejidos') return 'cat-tejidos';
+    return 'cat-otro';
+  }
+
+  // ── Modal ──
+  function abrirModal(p) {
+    const src = p.foto_full ? `fotos/${p.foto_full}` : '';
+    document.getElementById('modal-foto').src    = src;
+    document.getElementById('modal-foto').alt    = p.nombre;
+    document.getElementById('modal-nombre').textContent = p.nombre;
+    document.getElementById('modal-precio').textContent = formatPrecio(p.precio);
+    const catEl = document.getElementById('modal-cat');
+    catEl.textContent  = p.categoria;
+    catEl.className    = `tarjeta-categoria modal-cat ${claseCategoria(p.categoria)}`;
+    document.getElementById('modal').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal(e) {
+    if (e && e.target !== document.getElementById('modal') && e.target.className !== 'modal-cerrar') return;
+    document.getElementById('modal').classList.remove('visible');
+    document.getElementById('modal-foto').src = '';
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+
+  // ── Carga el JSON ──
+  async function cargarProductos() {
+    try {
+      const res = await fetch('productos.json?t=' + Date.now());
+      if (!res.ok) throw new Error('No se pudo leer productos.json');
+      todos = (await res.json()).map(normalizar);
+      filtrar();
+    } catch (err) {
+      document.getElementById('galeria').innerHTML =
+        `<div class="mensaje-central"><span>⚠️</span>${err.message}</div>`;
+    }
+  }
+
+  // ── Renderiza la galería ──
+  function render(lista) {
+    const galeria  = document.getElementById('galeria');
+    const contador = document.getElementById('contador');
+
+    if (lista.length === 0) {
+      galeria.innerHTML = '<div class="mensaje-central"><span>🌱</span>Sin productos que coincidan</div>';
+      contador.textContent = '';
+      return;
+    }
+
+    contador.textContent = `Mostrando ${lista.length} producto${lista.length !== 1 ? 's' : ''}`;
+
+    galeria.innerHTML = lista.map((p, i) => {
+      const thumb = p.foto_thumb ? `fotos/${p.foto_thumb}` : '';
+      const fotoHtml = thumb
+        ? `<img class="tarjeta-foto" src="${thumb}" alt="${p.nombre}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />`
+        : '';
+      const placeholder = (!thumb)
+        ? `<div class="tarjeta-placeholder">🌿</div>`
+        : `<div class="tarjeta-placeholder" style="display:none">🌿</div>`;
+
+      const fechaHtml = p.fecha
+        ? `<div class="tarjeta-fecha">${p.fecha.slice(0, 10)}</div>`
+        : '';
+
+      const tieneZoom = !!p.foto_full;
+
+      return `
+        <div class="tarjeta">
+          <div class="tarjeta-imagen" ${tieneZoom ? `onclick="abrirModal(todos[${i}])" title="Toca para ver en grande"` : ''}>
+            ${fotoHtml}${placeholder}
+          </div>
+          <div class="tarjeta-info">
+            <div class="tarjeta-nombre">${p.nombre}</div>
+            <div class="tarjeta-precio">${formatPrecio(p.precio)}</div>
+            <span class="tarjeta-categoria ${claseCategoria(p.categoria)}">${p.categoria}</span>
+            ${fechaHtml}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Filtro combinado ──
+  function filtrar() {
+    const texto = document.getElementById('buscador').value.toLowerCase().trim();
+    const lista = todos.filter(p => {
+      const categoriaOk = filtroActivo === 'todos' || p.categoria === filtroActivo;
+      const textoOk = !texto || p.nombre.toLowerCase().includes(texto);
+      return categoriaOk && textoOk;
+    });
+    render(lista);
+  }
+
+  function setFiltro(cat, btn) {
+    filtroActivo = cat;
+    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    filtrar();
+  }
+
+  cargarProductos();
+</script>
+</body>
+</html>

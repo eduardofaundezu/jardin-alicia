@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: jardin-alicia-bot
+    env: python
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    plan: free
+    envVars:
+      - key: TELEGRAM_TOKEN
+        value: 8778673434:AAHNEui7oWzCjfsgnCMEQwEoJiodOD-nDoE
