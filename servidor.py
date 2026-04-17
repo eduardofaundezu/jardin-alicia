@@ -2,7 +2,10 @@ from flask import Flask, send_from_directory
 import os
 import json
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__,
+            static_folder=BASE_DIR,
+            static_url_path='')
 
 @app.route('/')
 def index():
