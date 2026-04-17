@@ -17,6 +17,8 @@ def productos():
     try:
         with open('productos.json', 'r', encoding='utf-8') as f:
             return jsonify(json.load(f))
+    except FileNotFoundError:
+        return jsonify([]), 200  # Retorna array vacío si no existe
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
