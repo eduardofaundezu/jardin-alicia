@@ -5,22 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Jardín Alicia</title>
   <style>
+    :root {
+      --header1:   #2e7d32;
+      --header2:   #66bb6a;
+      --primario:  #2e7d32;
+      --secundario:#66bb6a;
+      --texto:     #1b5e20;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #f0f7f0;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
       color: #2d4a2d;
       min-height: 100vh;
+      transition: background-image 0.5s;
     }
+
+    /* Overlay semitransparente cuando hay imagen de fondo */
+    body.con-imagen::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.30);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body > * { position: relative; z-index: 1; }
 
     /* ── HEADER ── */
     header {
-      background: linear-gradient(135deg, #2e7d32, #66bb6a);
+      background: linear-gradient(135deg, var(--header1), var(--header2));
       color: white;
       padding: 28px 20px 20px;
       text-align: center;
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    body.con-imagen header {
+      background: linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));
+      backdrop-filter: blur(2px);
     }
     header h1 {
       font-size: 2rem;
@@ -55,7 +83,7 @@
       color: #2d4a2d;
       transition: border-color 0.2s;
     }
-    .buscador:focus { border-color: #2e7d32; }
+    .buscador:focus { border-color: var(--primario); }
 
     .filtros {
       display: flex;
@@ -66,19 +94,19 @@
     .btn-filtro {
       padding: 10px 20px;
       font-size: 1rem;
-      border: 2px solid #a5d6a7;
+      border: 2px solid var(--secundario);
       border-radius: 10px;
       background: white;
-      color: #2e7d32;
+      color: var(--primario);
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
     }
-    .btn-filtro:hover { background: #e8f5e9; }
+    .btn-filtro:hover { opacity: 0.85; }
     .btn-filtro.activo {
-      background: #2e7d32;
+      background: var(--primario);
       color: white;
-      border-color: #2e7d32;
+      border-color: var(--primario);
     }
 
     /* ── CONTADOR ── */
@@ -87,7 +115,7 @@
       margin: 0 auto 12px;
       padding: 0 16px;
       font-size: 0.95rem;
-      color: #558b2f;
+      color: var(--primario);
     }
 
     /* ── GRID ── */
@@ -144,14 +172,14 @@
     .tarjeta-nombre {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #1b5e20;
+      color: var(--texto);
       line-height: 1.3;
     }
 
     .tarjeta-precio {
       font-size: 1.25rem;
       font-weight: 800;
-      color: #2e7d32;
+      color: var(--primario);
     }
 
     .tarjeta-categoria {
@@ -172,11 +200,18 @@
       margin-top: 4px;
     }
 
+    .tarjeta-codigo {
+      font-size: 0.78rem;
+      color: #9e9e9e;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
     /* ── VACÍO / ERROR ── */
     .mensaje-central {
       text-align: center;
       padding: 60px 20px;
-      color: #558b2f;
+      color: var(--primario);
       font-size: 1.15rem;
       grid-column: 1 / -1;
     }
@@ -187,9 +222,23 @@
       text-align: center;
       padding: 20px;
       font-size: 0.88rem;
-      color: #81c784;
-      border-top: 1px solid #c8e6c9;
+      color: var(--secundario);
+      border-top: 1px solid var(--secundario);
       background: #f0f7f0;
+    }
+    body.con-imagen footer {
+      background: rgba(0,0,0,0.4);
+      color: rgba(255,255,255,0.7);
+      border-top-color: rgba(255,255,255,0.2);
+    }
+    body.con-imagen .controles {
+      background: rgba(255,255,255,0.80);
+      border-radius: 14px;
+      padding: 12px 16px;
+    }
+    body.con-imagen .contador {
+      color: white;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
     }
 
     /* ── CURSOR ZOOM ── */
@@ -420,8 +469,8 @@
         ? `<div class="tarjeta-placeholder">🌿</div>`
         : `<div class="tarjeta-placeholder" style="display:none">🌿</div>`;
 
-      const fechaHtml = p.fecha
-        ? `<div class="tarjeta-fecha">${p.fecha.slice(0, 10)}</div>`
+      const codigoHtml = p.id
+        ? `<div class="tarjeta-codigo">Código: ${p.id}</div>`
         : '';
 
       const tieneZoom = !!p.foto_full;
@@ -435,7 +484,7 @@
             <div class="tarjeta-nombre">${p.nombre}</div>
             <div class="tarjeta-precio">${formatPrecio(p.precio)}</div>
             <span class="tarjeta-categoria ${claseCategoria(p.categoria)}">${p.categoria}</span>
-            ${fechaHtml}
+            ${codigoHtml}
           </div>
         </div>`;
     }).join('');
@@ -459,7 +508,24 @@
     filtrar();
   }
 
-  cargarProductos();
+  // ── Carga y aplica el fondo ──
+  async function cargarTema() {
+    try {
+      const res = await fetch('tema.json?t=' + Date.now());
+      if (!res.ok) return;
+      const data = await res.json();
+
+      if (data.archivo) {
+        document.body.style.backgroundImage = `url('fondos_precargados/${data.archivo}')`;
+        document.body.classList.add('con-imagen');
+        console.log('Fondo aplicado:', data.fondo_actual);
+      }
+    } catch (e) {
+      console.log('tema.json no disponible, usando fondo por defecto');
+    }
+  }
+
+  cargarTema().then(cargarProductos);
 </script>
 </body>
 </html>
