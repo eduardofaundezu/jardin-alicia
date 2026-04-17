@@ -54,6 +54,18 @@ def debug():
         'cantidad': len(fotos)
     }
 
+@app.route('/debug-productos')
+def debug_productos():
+    try:
+        with open('productos.json', 'r') as f:
+            data = json.load(f)
+        return {
+            'cantidad_productos': len(data),
+            'productos': data
+        }
+    except:
+        return {'error': 'No se puede leer productos.json'}
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port, debug=False)
