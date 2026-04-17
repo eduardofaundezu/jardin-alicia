@@ -1,0 +1,117 @@
+[
+  {
+    "id": 1,
+    "nombre": "Mesa",
+    "precio": "2300",
+    "categoria": "Tejidos",
+    "foto": "foto_20260415223940.jpg",
+    "fecha": "2026-04-15 22:39:55"
+  },
+  {
+    "id": 2,
+    "nombre": "Polerones bebe",
+    "precio": "4900",
+    "categoria": "Tejidos",
+    "foto": "foto_20260415224756.jpg",
+    "fecha": "2026-04-15 22:48:18"
+  },
+  {
+    "id": 3,
+    "nombre": "Arcoiris",
+    "precio": "3990",
+    "categoria": "Tejidos",
+    "foto_thumb": "foto_20260415225403_thumb.jpg",
+    "foto_full": "foto_20260415225403_full.jpg",
+    "fecha": "2026-04-15 22:54:17"
+  },
+  {
+    "id": 4,
+    "nombre": "Planta",
+    "precio": "1500",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260415234028_thumb.jpg",
+    "foto_full": "foto_20260415234028_full.jpg",
+    "fecha": "2026-04-15 23:40:43"
+  },
+  {
+    "id": 5,
+    "nombre": "Edu",
+    "precio": "9999",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260416130225_thumb.jpg",
+    "foto_full": "foto_20260416130225_full.jpg",
+    "fecha": "2026-04-16 13:02:40"
+  },
+  {
+    "id": 6,
+    "nombre": "Error",
+    "precio": "404",
+    "categoria": "Tejidos",
+    "foto_thumb": "foto_20260416140227_thumb.jpg",
+    "foto_full": "foto_20260416140227_full.jpg",
+    "fecha": "2026-04-16 13:10:56"
+  },
+  {
+    "id": 7,
+    "nombre": "Pulpo",
+    "precio": "6666",
+    "categoria": "Tejidos",
+    "foto_thumb": "foto_20260416132117_thumb.jpg",
+    "foto_full": "foto_20260416132117_full.jpg",
+    "fecha": "2026-04-16 13:21:37"
+  },
+  {
+    "id": 8,
+    "nombre": "Polera",
+    "precio": "2000",
+    "categoria": "Tejidos",
+    "foto_thumb": "foto_20260416134022_thumb.jpg",
+    "foto_full": "foto_20260416134022_full.jpg",
+    "fecha": "2026-04-16 13:40:38"
+  },
+  {
+    "id": 9,
+    "nombre": "Flojera",
+    "precio": "8888",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260417003318_thumb.jpg",
+    "foto_full": "foto_20260417003318_full.jpg",
+    "fecha": "2026-04-17 00:33:32"
+  },
+  {
+    "id": 10,
+    "nombre": "Flor",
+    "precio": "9999",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260417005409_thumb.jpg",
+    "foto_full": "foto_20260417005409_full.jpg",
+    "fecha": "2026-04-17 00:54:19"
+  },
+  {
+    "id": 11,
+    "nombre": "Error",
+    "precio": "2000",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260417005926_thumb.jpg",
+    "foto_full": "foto_20260417005926_full.jpg",
+    "fecha": "2026-04-17 00:59:32"
+  },
+  {
+    "id": 12,
+    "nombre": "Salmon",
+    "precio": "15990",
+    "categoria": "Tejidos",
+    "foto_thumb": "foto_20260417010255_thumb.jpg",
+    "foto_full": "foto_20260417010255_full.jpg",
+    "fecha": "2026-04-17 01:03:10"
+  },
+  {
+    "id": 13,
+    "nombre": "Blanca",
+    "precio": "9999",
+    "categoria": "Flores",
+    "foto_thumb": "foto_20260417010339_thumb.jpg",
+    "foto_full": "foto_20260417010339_full.jpg",
+    "fecha": "2026-04-17 01:04:07"
+  }
+]
