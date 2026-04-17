@@ -1,30 +1,48 @@
-from flask import Flask, send_from_directory
+from flask import Flask, jsonify
 import os
 import json
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-app = Flask(__name__,
-            static_folder=BASE_DIR,
-            static_url_path='')
+app = Flask(__name__)
 
 @app.route('/')
 def index():
-    with open('index.html', 'r', encoding='utf-8') as f:
-        return f.read()
+    try:
+        with open('index.html', 'r', encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/productos.json')
-def get_productos():
-    with open('productos.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+def productos():
+    try:
+        with open('productos.json', 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/tema.json')
-def get_tema():
-    with open('tema.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+def tema():
+    try:
+        with open('tema.json', 'r', encoding='utf-8') as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@app.route('/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('.', filename)
+@app.route('/fotos/<filename>')
+def serve_foto(filename):
+    try:
+        with open(f'fotos/{filename}', 'rb') as f:
+            return f.read(), 200, {'Content-Type': 'image/jpeg'}
+    except Exception as e:
+        return f"Error: {str(e)}", 404
+
+@app.route('/fondos_precargados/<filename>')
+def serve_fondo(filename):
+    try:
+        with open(f'fondos_precargados/{filename}', 'rb') as f:
+            return f.read(), 200, {'Content-Type': 'image/jpeg'}
+    except Exception as e:
+        return f"Error: {str(e)}", 404
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
