@@ -46,6 +46,14 @@ def serve_fondo(filename):
     except Exception as e:
         return f"Error: {str(e)}", 404
 
+@app.route('/debug')
+def debug():
+    fotos = os.listdir('fotos') if os.path.exists('fotos') else []
+    return {
+        'fotos_en_servidor': fotos,
+        'cantidad': len(fotos)
+    }
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port, debug=False)
