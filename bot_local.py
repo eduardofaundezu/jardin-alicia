@@ -152,8 +152,12 @@ def normalizar_categoria(texto):
 # ── /start ────────────────────────────────────────────────────
 async def inicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
-    await update.message.reply_text("Hola! Envía una foto de tu producto")
-    return ESPERANDO_FOTO
+    if update.message.chat.type in ['group', 'supergroup']:
+        await update.message.reply_text("¡Bienvenido al grupo Jardín Alicia!")
+        return ESPERANDO_FOTO
+    else:
+        await update.message.reply_text("Hola! Envía una foto de tu producto")
+        return ESPERANDO_FOTO
 
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
