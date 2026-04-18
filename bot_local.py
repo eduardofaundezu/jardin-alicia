@@ -31,6 +31,7 @@ ESPERANDO_PRECIO    = 3
 ESPERANDO_CATEGORIA = 4
 CAMBIAR_FOTO_ESPERAR = 5
 FONDOS_ESPERAR       = 6
+ESPERANDO_COMANDO    = 7
 
 MAPA_CATEGORIAS = {"1": "Flores", "2": "Tejidos"}
 
@@ -423,7 +424,17 @@ async def recibir_fondo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("DEBUG fondos: Estado limpiado")
 
     await update.message.reply_text(f"✅ Fondo '{opcion['nombre']}' aplicado\nRecarga la galería (F5) para verlo.")
-    return ConversationHandler.END
+    return ESPERANDO_COMANDO
+
+
+async def esperando_comando(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Usa un comando:\n"
+        "/fondos — cambiar fondo\n"
+        "/admin — menú administrador\n"
+        "/salir — salir"
+    )
+    return ESPERANDO_COMANDO
 
 
 async def fondos_timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -512,6 +523,9 @@ def main():
         states={
             FONDOS_ESPERAR: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, recibir_fondo),
+            ],
+            ESPERANDO_COMANDO: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, esperando_comando),
             ],
             ConversationHandler.TIMEOUT: [
                 MessageHandler(filters.ALL, fondos_timeout),

@@ -207,6 +207,42 @@
       font-family: monospace;
     }
 
+    .tarjeta-contactar {
+      display: none; /* oculto — descomentar cuando esté listo el enlace */
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2e7d32;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+    .tarjeta-contactar:hover { text-decoration: underline; }
+
+    /* ── SELECTOR COLUMNAS ── */
+    .col-selector {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-col {
+      padding: 6px 16px;
+      font-size: 0.88rem;
+      border: 2px solid rgba(255,255,255,0.6);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-col:hover { background: rgba(255,255,255,0.30); }
+    .btn-col.activo {
+      background: white;
+      color: var(--primario);
+      border-color: white;
+    }
+
     /* ── VACÍO / ERROR ── */
     .mensaje-central {
       text-align: center;
@@ -328,6 +364,11 @@
 <header>
   <h1>🌿 Catálogo de Jardín Alicia</h1>
   <p>Flores y tejidos artesanales</p>
+  <div class="col-selector">
+    <button class="btn-col" onclick="setColumnas(2, this)">2 por fila</button>
+    <button class="btn-col activo" onclick="setColumnas(4, this)">4 por fila</button>
+    <button class="btn-col" onclick="setColumnas(6, this)">6 por fila</button>
+  </div>
 </header>
 
 <div class="controles">
@@ -410,6 +451,18 @@
     return 'cat-otro';
   }
 
+  function iconoCategoria(cat) {
+    if (cat === 'Flores')  return '🌸';
+    if (cat === 'Tejidos') return '🧶';
+    return '🌿';
+  }
+
+  function setColumnas(n, btn) {
+    document.getElementById('galeria').style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+    document.querySelectorAll('.btn-col').forEach(b => b.classList.remove('activo'));
+    if (btn) btn.classList.add('activo');
+  }
+
   // ── Modal ──
   function abrirModal(p) {
     const src = p.foto_full ? `fotos/${p.foto_full}` : '';
@@ -483,7 +536,8 @@
           <div class="tarjeta-info">
             <div class="tarjeta-nombre">${p.nombre}</div>
             <div class="tarjeta-precio">${formatPrecio(p.precio)}</div>
-            <span class="tarjeta-categoria ${claseCategoria(p.categoria)}">${p.categoria}</span>
+            <span class="tarjeta-categoria ${claseCategoria(p.categoria)}">${iconoCategoria(p.categoria)} ${p.categoria}</span>
+            <a class="tarjeta-contactar" href="#" target="_blank">☎️ Contactar</a>
             ${codigoHtml}
           </div>
         </div>`;
