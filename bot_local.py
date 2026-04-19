@@ -33,13 +33,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ── Estados ──────────────────────────────────────────────────
-ESPERANDO_FOTO          = 1
-ESPERANDO_NOMBRE        = 2
-ESPERANDO_PRECIO        = 3
-ESPERANDO_CATEGORIA     = 4
-CAMBIAR_FOTO_ESPERAR    = 5
-FONDOS_ESPERAR          = 6
-ESPERANDO_OBSERVACIONES = 8
+ESPERANDO_CANTIDAD_FOTOS = 0
+ESPERANDO_FOTO           = 1
+ESPERANDO_NOMBRE         = 2
+ESPERANDO_PRECIO         = 3
+ESPERANDO_CATEGORIA      = 4
+CAMBIAR_FOTO_ESPERAR     = 5
+FONDOS_ESPERAR           = 6
+ESPERANDO_OBSERVACIONES  = 8
+ESPERANDO_FOTOS_EXTRA    = 9
 # ESPERANDO_COMANDO (7) eliminado: conv_fondos ahora termina al seleccionar fondo
 
 MAPA_CATEGORIAS = {
@@ -153,6 +155,15 @@ async def descargar_y_procesar_foto(bot, foto_msg):
     return nombre_full, nombre_thumb
 
 
+async def descargar_foto_extra(bot, foto_msg, indice: int) -> str:
+    """Descarga foto adicional sin generar thumbnail. Retorna nombre del archivo."""
+    file = await bot.get_file(foto_msg.file_id)
+    ts = datetime.now().strftime("%Y%m%d%H%M%S%f")[:17]
+    nombre = f"foto_{ts}_extra{indice}.jpg"
+    await file.download_to_drive(f"fotos/{nombre}")
+    return nombre
+
+
 def normalizar_categoria(texto):
     return MAPA_CATEGORIAS.get(texto.strip(), None)
 
@@ -163,7 +174,30 @@ async def inicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.chat.type in ["group", "supergroup"]:
         await update.message.reply_text("⚠️ Usa privado: @Jardin_131_bot para subir fotos")
         return ConversationHandler.END
-    await update.message.reply_text("Hola! Envía una foto de tu producto")
+    await update.message.reply_text(
+        "¿Cuántas fotos tiene este producto?\n"
+        "Responde con un número del 1 al 5"
+    )
+    return ESPERANDO_CANTIDAD_FOTOS
+
+
+async def recibir_cantidad_fotos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    texto = update.message.text.strip()
+    if not texto.isdigit() or not (1 <= int(texto) <= 5):
+        await update.message.reply_text("❌ Escribe un número del 1 al 5")
+        return ESPERANDO_CANTIDAD_FOTOS
+
+    n = int(texto)
+    context.user_data["fotos_total"] = n
+    context.user_data["fotos_extra"] = []
+
+    if n == 1:
+        await update.message.reply_text("Envía la foto del producto")
+    else:
+        await update.message.reply_text(
+            f"Producto con {n} fotos.\n\n"
+            "Envía la foto de PORTADA (foto principal)"
+        )
     return ESPERANDO_FOTO
 
 
@@ -180,13 +214,8 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ── Flujo principal: agregar producto ────────────────────────
-async def texto_en_espera_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Primero envía una foto del producto.")
-    return ESPERANDO_FOTO
-
-
 async def recibir_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("DEBUG: Foto recibida (nuevo producto)")
+    print("DEBUG: Foto portada recibida")
     try:
         os.makedirs("fotos", exist_ok=True)
         nombre_full, nombre_thumb = await descargar_y_procesar_foto(
@@ -194,12 +223,67 @@ async def recibir_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         context.user_data["foto_full"]  = nombre_full
         context.user_data["foto_thumb"] = nombre_thumb
-        await update.message.reply_text("¿Cuál es el nombre del producto?")
-        return ESPERANDO_NOMBRE
     except Exception as e:
         print(f"ERROR en recibir_foto: {type(e).__name__}: {e}")
         await update.message.reply_text("❌ Error al guardar la foto. Intenta de nuevo.")
         return ESPERANDO_FOTO
+
+    fotos_total = context.user_data.get("fotos_total", 1)
+    if fotos_total > 1:
+        await update.message.reply_text(
+            f"✓ Portada guardada\n"
+            f"Envía foto 2 de {fotos_total}"
+        )
+        return ESPERANDO_FOTOS_EXTRA
+
+    await update.message.reply_text("¿Cuál es el nombre del producto?")
+    return ESPERANDO_NOMBRE
+
+
+async def texto_en_espera_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Primero envía una foto del producto.")
+    return ESPERANDO_FOTO
+
+
+async def texto_en_espera_fotos_extra(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    fotos_extra = context.user_data.get("fotos_extra", [])
+    fotos_total = context.user_data.get("fotos_total", 1)
+    siguiente   = 1 + len(fotos_extra) + 1
+    await update.message.reply_text(
+        f"Por favor envía una foto (foto {siguiente} de {fotos_total})"
+    )
+    return ESPERANDO_FOTOS_EXTRA
+
+
+async def recibir_fotos_extra(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    fotos_extra = context.user_data.get("fotos_extra", [])
+    fotos_total = context.user_data.get("fotos_total", 1)
+    indice      = len(fotos_extra) + 1
+
+    try:
+        os.makedirs("fotos", exist_ok=True)
+        nombre = await descargar_foto_extra(context.bot, update.message.photo[-1], indice)
+        fotos_extra.append(nombre)
+        context.user_data["fotos_extra"] = fotos_extra
+        print(f"DEBUG: foto extra {indice} guardada: fotos/{nombre}")
+    except Exception as e:
+        print(f"ERROR en recibir_fotos_extra: {type(e).__name__}: {e}")
+        await update.message.reply_text("❌ Error al guardar la foto. Intenta de nuevo.")
+        return ESPERANDO_FOTOS_EXTRA
+
+    fotos_recibidas = 1 + len(fotos_extra)  # portada + extras
+    if fotos_recibidas < fotos_total:
+        await update.message.reply_text(
+            f"✓ Foto {fotos_recibidas} guardada\n"
+            f"Envía foto {fotos_recibidas + 1} de {fotos_total}"
+        )
+        return ESPERANDO_FOTOS_EXTRA
+
+    await update.message.reply_text(
+        f"✓ Todas las fotos guardadas ({fotos_total})\n\n"
+        "¿Cuál es el nombre del producto?"
+    )
+    return ESPERANDO_NOMBRE
 
 
 async def recibir_nombre(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -257,6 +341,10 @@ async def recibir_observaciones(update: Update, context: ContextTypes.DEFAULT_TY
     print(f"\n=== GUARDANDO PRODUCTO ===")
     print(f"nombre={nombre}  precio={precio}  cat={categoria}  obs={observaciones[:30]}")
 
+    fotos_extra = context.user_data.get("fotos_extra", [])
+    print(f"\n=== GUARDANDO PRODUCTO ===")
+    print(f"nombre={nombre}  precio={precio}  cat={categoria}  fotos_extra={len(fotos_extra)}")
+
     try:
         productos = leer_productos()
         nuevo = {
@@ -268,6 +356,7 @@ async def recibir_observaciones(update: Update, context: ContextTypes.DEFAULT_TY
             "observaciones": observaciones,
             "foto_thumb":    foto_thumb,
             "foto_full":     foto_full,
+            "fotos_extra":   fotos_extra,
             "fecha":         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         productos.append(nuevo)
@@ -280,13 +369,15 @@ async def recibir_observaciones(update: Update, context: ContextTypes.DEFAULT_TY
 
     pid = nuevo["id"]
     context.user_data.clear()
-    obs_linea = f"\nObs: {observaciones}" if observaciones else ""
+    obs_linea   = f"\nObs: {observaciones}" if observaciones else ""
+    extra_linea = f"\nFotos: {1 + len(fotos_extra)}" if fotos_extra else ""
     await update.message.reply_text(
         f"✅ {nombre} guardado en {categoria}\n"
-        f"Código: {pid}{obs_linea}\n\n"
-        f"Envía otra foto para agregar un nuevo producto."
+        f"Código: {pid}{obs_linea}{extra_linea}\n\n"
+        f"¿Cuántas fotos tiene el siguiente producto? (1-5)\n"
+        f"O /salir para terminar"
     )
-    return ESPERANDO_FOTO
+    return ESPERANDO_CANTIDAD_FOTOS
 
 
 # ── /listar ───────────────────────────────────────────────────
@@ -327,6 +418,8 @@ async def cmd_eliminar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     borrar_foto(encontrado.get("foto_full"),  motivo)
     borrar_foto(encontrado.get("foto_thumb"), motivo)
     borrar_foto(encontrado.get("foto"),       motivo)
+    for extra in encontrado.get("fotos_extra", []):
+        borrar_foto(extra, motivo)
 
     productos = [p for p in productos if p.get("id") != pid]
     productos = reasignar_ids(productos)
@@ -489,9 +582,16 @@ def crear_app(token: str, contacto: str) -> Application:
     conv_agregar = ConversationHandler(
         entry_points=[CommandHandler("inicio", inicio)],
         states={
+            ESPERANDO_CANTIDAD_FOTOS: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, recibir_cantidad_fotos),
+            ],
             ESPERANDO_FOTO: [
                 MessageHandler(filters.PHOTO, recibir_foto),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, texto_en_espera_foto),
+            ],
+            ESPERANDO_FOTOS_EXTRA: [
+                MessageHandler(filters.PHOTO, recibir_fotos_extra),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, texto_en_espera_fotos_extra),
             ],
             ESPERANDO_NOMBRE:        [MessageHandler(filters.TEXT & ~filters.COMMAND, recibir_nombre)],
             ESPERANDO_PRECIO:        [MessageHandler(filters.TEXT & ~filters.COMMAND, recibir_precio)],

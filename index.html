@@ -265,6 +265,46 @@
     }
     .tarjeta-imagen:hover::after { opacity: 1; }
 
+    /* ── GALERÍA MODAL ── */
+    .modal-galeria { position: relative; }
+
+    .modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.45);
+      color: white;
+      border: none;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 5;
+      transition: background 0.2s;
+    }
+    .modal-nav:hover { background: rgba(0,0,0,0.75); }
+    .modal-prev { left: 8px; }
+    .modal-next { right: 8px; }
+
+    .modal-puntos {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 0;
+      background: #111;
+    }
+    .modal-punto {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+    .modal-punto.activo { background: white; }
+
     /* ── MODAL ── */
     .modal-overlay {
       display: none;
@@ -401,7 +441,12 @@
 <div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
   <div class="modal-caja">
     <button class="modal-cerrar" onclick="cerrarModal()">✕</button>
-    <img class="modal-foto" id="modal-foto" src="" alt="" />
+    <div class="modal-galeria">
+      <img class="modal-foto" id="modal-foto" src="" alt="" />
+      <button class="modal-nav modal-prev" id="modal-prev" onclick="navModal(-1)" style="display:none">&#8592;</button>
+      <button class="modal-nav modal-next" id="modal-next" onclick="navModal(1)"  style="display:none">&#8594;</button>
+    </div>
+    <div class="modal-puntos" id="modal-puntos" style="display:none"></div>
     <div class="modal-info">
       <div class="modal-nombre" id="modal-nombre"></div>
       <div class="modal-precio" id="modal-precio"></div>
@@ -423,6 +468,8 @@
   let todos = [];
   let filtroActivo   = 'todos';
   let contactoActual = '';
+  let modalFotos     = [];
+  let modalIdx       = 0;
 
   function normalizar(p) {
     const fotoVieja = p.foto || extraerNombreFoto(p.foto_path) || '';
@@ -435,6 +482,7 @@
       contacto:      p.contacto      || '',
       foto_thumb:    p.foto_thumb    || fotoVieja,
       foto_full:     p.foto_full     || fotoVieja,
+      fotos_extra:   p.fotos_extra   || [],
       fecha:         p.fecha         || '',
     };
   }
@@ -472,9 +520,49 @@
   }
 
   // ── Modal ──
+  function actualizarFotoModal() {
+    document.getElementById('modal-foto').src = modalFotos[modalIdx] || '';
+    document.querySelectorAll('.modal-punto').forEach((el, i) =>
+      el.classList.toggle('activo', i === modalIdx)
+    );
+  }
+
+  function navModal(dir) {
+    modalIdx = (modalIdx + dir + modalFotos.length) % modalFotos.length;
+    actualizarFotoModal();
+  }
+
+  function irFotoModal(idx) {
+    modalIdx = idx;
+    actualizarFotoModal();
+  }
+
   function abrirModal(p) {
-    document.getElementById('modal-foto').src = p.foto_full ? `fotos/${p.foto_full}` : '';
+    // Construir lista de fotos: portada + extras
+    const portada = p.foto_full ? `fotos/${p.foto_full}` : '';
+    const extras  = (p.fotos_extra || []).map(f => `fotos/${f}`);
+    modalFotos = portada ? [portada, ...extras] : extras;
+    modalIdx   = 0;
+
+    document.getElementById('modal-foto').src = modalFotos[0] || '';
     document.getElementById('modal-foto').alt = p.nombre;
+
+    // Navegación — mostrar solo si hay más de 1 foto
+    const multi = modalFotos.length > 1;
+    document.getElementById('modal-prev').style.display = multi ? 'flex' : 'none';
+    document.getElementById('modal-next').style.display = multi ? 'flex' : 'none';
+
+    const puntosEl = document.getElementById('modal-puntos');
+    if (multi) {
+      puntosEl.style.display = 'flex';
+      puntosEl.innerHTML = modalFotos.map((_, i) =>
+        `<button class="modal-punto${i === 0 ? ' activo' : ''}" onclick="irFotoModal(${i})"></button>`
+      ).join('');
+    } else {
+      puntosEl.style.display = 'none';
+      puntosEl.innerHTML = '';
+    }
+
     document.getElementById('modal-nombre').textContent = p.nombre;
     document.getElementById('modal-precio').textContent = formatPrecio(p.precio);
 
@@ -523,7 +611,12 @@
     });
   }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrarModal(); return; }
+    if (!document.getElementById('modal').classList.contains('visible')) return;
+    if (e.key === 'ArrowLeft')  navModal(-1);
+    if (e.key === 'ArrowRight') navModal(1);
+  });
 
   // ── Carga el JSON ──
   async function cargarProductos() {
