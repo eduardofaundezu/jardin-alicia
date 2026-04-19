@@ -39,8 +39,8 @@ ESPERANDO_PRECIO        = 3
 ESPERANDO_CATEGORIA     = 4
 CAMBIAR_FOTO_ESPERAR    = 5
 FONDOS_ESPERAR          = 6
-ESPERANDO_COMANDO       = 7
 ESPERANDO_OBSERVACIONES = 8
+# ESPERANDO_COMANDO (7) eliminado: conv_fondos ahora termina al seleccionar fondo
 
 MAPA_CATEGORIAS = {
     "1": "Flores",
@@ -163,6 +163,7 @@ async def inicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()  # limpia cualquier flujo activo al entrar al menú
     await update.message.reply_text(
         "Menu administrador:\n\n"
         "/eliminar <ID> — borrar producto\n"
@@ -170,6 +171,7 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/fondos — cambiar tema galería\n"
         "/salir — salir del menú"
     )
+    return ConversationHandler.END
 
 
 # ── Flujo principal: agregar producto ────────────────────────
@@ -426,19 +428,10 @@ async def recibir_fondo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text(
         f"✅ Fondo '{opcion['nombre']}' aplicado\n"
-        f"Recarga la galería (F5) para verlo."
+        f"Recarga la galería (F5) para verlo.\n\n"
+        f"Escribe /fondos para cambiar de nuevo."
     )
-    return ESPERANDO_COMANDO
-
-
-async def esperando_comando(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Usa un comando:\n"
-        "/fondos — cambiar fondo\n"
-        "/admin — menú administrador\n"
-        "/salir — salir"
-    )
-    return ESPERANDO_COMANDO
+    return ConversationHandler.END
 
 
 async def fondos_timeout(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -492,7 +485,11 @@ def crear_app(token: str, contacto: str) -> Application:
         fallbacks=[
             CommandHandler("cancelar", cancelar),
             CommandHandler("salir",    salir),
+            # /admin y /fondos terminan conv_agregar limpiamente antes de su propio flujo
+            CommandHandler("admin",    admin),
+            CommandHandler("fondos",   cancelar),
         ],
+        conversation_timeout=600,   # 10 min: evita que el flujo quede zombie
         allow_reentry=True,
     )
 
@@ -522,9 +519,6 @@ def crear_app(token: str, contacto: str) -> Application:
             FONDOS_ESPERAR: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, recibir_fondo),
             ],
-            ESPERANDO_COMANDO: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, esperando_comando),
-            ],
             ConversationHandler.TIMEOUT: [
                 MessageHandler(filters.ALL, fondos_timeout),
             ],
@@ -532,9 +526,11 @@ def crear_app(token: str, contacto: str) -> Application:
         fallbacks=[
             CommandHandler("cancelar", cancelar),
             CommandHandler("salir",    salir),
+            CommandHandler("admin",    admin),
+            # /fondos en fallback permite reiniciar sin escribirlo dos veces
             CommandHandler("fondos",   cmd_fondos),
         ],
-        conversation_timeout=300,
+        conversation_timeout=120,   # 2 min: si no elige número, expira
         allow_reentry=True,
     )
 
