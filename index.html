@@ -131,25 +131,6 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
 
-    /* Badge circular con el código sobre la imagen */
-    .tarjeta-codigo-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: var(--primario);
-      color: white;
-      font-size: 0.78rem;
-      font-weight: 700;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.30);
-      z-index: 2;
-      pointer-events: none;
-    }
 
     .tarjeta-foto {
       width: 100%;
@@ -403,10 +384,10 @@
   <div class="filtros">
     <button class="btn-filtro activo" onclick="setFiltro('todos', this)">Todos</button>
     <button class="btn-filtro" onclick="setFiltro('Flores', this)">🌸 Flores</button>
-    <button class="btn-filtro" onclick="setFiltro('Plantas', this)">🪴 Plantas</button>
-    <button class="btn-filtro" onclick="setFiltro('Textil', this)">🧵 Textil</button>
-    <button class="btn-filtro" onclick="setFiltro('Crochet', this)">🧶 Crochet</button>
-    <button class="btn-filtro" onclick="setFiltro('Varios', this)">· Varios</button>
+    <button class="btn-filtro" onclick="setFiltro('Plantas', this)">🌱 Plantas</button>
+    <button class="btn-filtro" onclick="setFiltro('Textil', this)">🧶 Textil</button>
+    <button class="btn-filtro" onclick="setFiltro('Crochet', this)">🪡 Crochet</button>
+    <button class="btn-filtro" onclick="setFiltro('Varios', this)">✨ Varios</button>
   </div>
 </div>
 
@@ -486,7 +467,7 @@
   }
 
   function iconoCategoria(cat) {
-    const m = { Flores:'🌸', Plantas:'🪴', Textil:'🧵', Crochet:'🧶', Varios:'·' };
+    const m = { Flores:'🌸', Plantas:'🌱', Textil:'🧶', Crochet:'🪡', Varios:'✨' };
     return m[cat] || '🌿';
   }
 
@@ -587,16 +568,12 @@
         ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${items.map(s => `<li>${s}</li>`).join('')}</ul></div>`
         : '';
 
-      const codigoBadge = p.id
-        ? `<div class="tarjeta-codigo-badge">${p.id}</div>`
-        : '';
-
       const tieneZoom = !!p.foto_full;
 
       return `
         <div class="tarjeta">
           <div class="tarjeta-imagen" ${tieneZoom ? `onclick="abrirModal(todos[${i}])" title="Toca para ver en grande"` : ''}>
-            ${codigoBadge}${fotoHtml}${placeholder}
+            ${fotoHtml}${placeholder}
           </div>
           <div class="tarjeta-header">
             <span class="tarjeta-nombre">${p.nombre}</span>
