@@ -121,14 +121,19 @@ def guardar_tema(opcion):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def borrar_foto(nombre):
-    if nombre:
-        ruta = f"fotos/{nombre}"
-        try:
-            if os.path.exists(ruta):
-                os.remove(ruta)
-        except Exception as e:
-            print(f"WARN: No se pudo borrar {ruta}: {e}")
+def borrar_foto(nombre, motivo="sin motivo especificado"):
+    if not nombre:
+        return
+    ruta = f"fotos/{nombre}"
+    try:
+        if os.path.exists(ruta):
+            tam = os.path.getsize(ruta)
+            os.remove(ruta)
+            print(f"[BORRAR_FOTO] OK  archivo={ruta}  tamaño={tam}B  motivo={motivo}")
+        else:
+            print(f"[BORRAR_FOTO] SKIP archivo={ruta} no existe  motivo={motivo}")
+    except Exception as e:
+        print(f"[BORRAR_FOTO] ERROR archivo={ruta}  motivo={motivo}  error={e}")
 
 
 async def descargar_y_procesar_foto(bot, foto_msg):
@@ -318,9 +323,10 @@ async def cmd_eliminar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ No existe producto con ID {pid}.")
         return
 
-    borrar_foto(encontrado.get("foto_full"))
-    borrar_foto(encontrado.get("foto_thumb"))
-    borrar_foto(encontrado.get("foto"))
+    motivo = f"/eliminar id={pid}"
+    borrar_foto(encontrado.get("foto_full"),  motivo)
+    borrar_foto(encontrado.get("foto_thumb"), motivo)
+    borrar_foto(encontrado.get("foto"),       motivo)
 
     productos = [p for p in productos if p.get("id") != pid]
     productos = reasignar_ids(productos)
@@ -360,7 +366,17 @@ async def cmd_cambiar_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def recibir_nueva_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     pid = context.user_data.get("cambiar_id")
     if pid is None:
+        print("[MODIFICAR] recibir_nueva_foto sin cambiar_id — sesión perdida, abortando sin borrar nada")
         await update.message.reply_text("❌ Sesión perdida. Usa /modificar <id> de nuevo.")
+        return ConversationHandler.END
+
+    # Verificar que el producto existe ANTES de descargar ni borrar nada
+    productos = leer_productos()
+    producto = next((p for p in productos if p.get("id") == pid), None)
+    if producto is None:
+        print(f"[MODIFICAR] producto id={pid} no existe — abortando sin borrar nada")
+        await update.message.reply_text(f"❌ Producto {pid} no encontrado. Operación cancelada.")
+        context.user_data.clear()
         return ConversationHandler.END
 
     try:
@@ -369,23 +385,23 @@ async def recibir_nueva_foto(update: Update, context: ContextTypes.DEFAULT_TYPE)
             context.bot, update.message.photo[-1]
         )
     except Exception as e:
-        print(f"ERROR descargando nueva foto: {e}")
+        print(f"[MODIFICAR] ERROR descargando nueva foto: {e}")
         await update.message.reply_text("❌ Error al guardar la foto. Intenta de nuevo.")
         return CAMBIAR_FOTO_ESPERAR
 
-    productos = leer_productos()
-    for p in productos:
-        if p.get("id") == pid:
-            borrar_foto(p.get("foto_full"))
-            borrar_foto(p.get("foto_thumb"))
-            borrar_foto(p.get("foto"))
-            p["foto_full"]  = nombre_full
-            p["foto_thumb"] = nombre_thumb
-            p.pop("foto", None)
-            break
+    # Borrar fotos viejas solo si el producto fue confirmado arriba
+    motivo = f"/modificar id={pid}"
+    borrar_foto(producto.get("foto_full"),  motivo)
+    borrar_foto(producto.get("foto_thumb"), motivo)
+    borrar_foto(producto.get("foto"),       motivo)
+
+    producto["foto_full"]  = nombre_full
+    producto["foto_thumb"] = nombre_thumb
+    producto.pop("foto", None)
 
     guardar_productos_lista(productos)
     context.user_data.clear()
+    print(f"[MODIFICAR] foto actualizada para id={pid}: {nombre_full}")
     await update.message.reply_text("✅ Foto actualizada")
     return ConversationHandler.END
 
@@ -508,6 +524,10 @@ def crear_app(token: str, contacto: str) -> Application:
         fallbacks=[
             CommandHandler("cancelar", cancelar),
             CommandHandler("salir",    salir),
+            # /admin y /fondos terminan este flujo limpiamente
+            # evita que una foto enviada después llegue a recibir_nueva_foto por error
+            CommandHandler("admin",   admin),
+            CommandHandler("fondos",  cancelar),
         ],
         conversation_timeout=300,
         allow_reentry=True,
