@@ -26,12 +26,11 @@
       transition: background-image 0.5s;
     }
 
-    /* Overlay semitransparente cuando hay imagen de fondo */
     body.con-imagen::before {
       content: '';
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.30);
+      background: rgba(0,0,0,0.30);
       z-index: 0;
       pointer-events: none;
     }
@@ -50,15 +49,8 @@
       background: linear-gradient(135deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35));
       backdrop-filter: blur(2px);
     }
-    header h1 {
-      font-size: 2rem;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-    header p {
-      font-size: 1rem;
-      opacity: 0.85;
-    }
+    header h1 { font-size: 2rem; letter-spacing: 1px; margin-bottom: 4px; }
+    header p  { font-size: 1rem; opacity: 0.85; }
 
     /* ── CONTROLES ── */
     .controles {
@@ -85,15 +77,11 @@
     }
     .buscador:focus { border-color: var(--primario); }
 
-    .filtros {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .btn-filtro {
-      padding: 10px 20px;
-      font-size: 1rem;
+      padding: 10px 18px;
+      font-size: 0.95rem;
       border: 2px solid var(--secundario);
       border-radius: 10px;
       background: white;
@@ -161,27 +149,53 @@
       font-size: 3.5rem;
     }
 
-    .tarjeta-info {
-      padding: 14px 16px 18px;
-      flex: 1;
+    /* Header verde: nombre + precio */
+    .tarjeta-header {
+      background: var(--primario);
+      color: white;
+      padding: 10px 14px;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
     }
-
     .tarjeta-nombre {
-      font-size: 1.15rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: var(--texto);
       line-height: 1.3;
+      flex: 1;
     }
-
-    .tarjeta-precio {
-      font-size: 1.25rem;
+    .tarjeta-precio-badge {
+      font-size: 1rem;
       font-weight: 800;
-      color: var(--primario);
+      white-space: nowrap;
+      opacity: 0.92;
     }
 
+    /* Cuerpo: observaciones */
+    .tarjeta-body {
+      padding: 10px 14px;
+      border-top: 1px solid #e8f5e9;
+      flex: 1;
+    }
+    .tarjeta-observaciones {
+      font-size: 0.87rem;
+      color: #4a6741;
+      line-height: 1.55;
+    }
+
+    /* Footer: precio + código */
+    .tarjeta-footer {
+      padding: 8px 14px;
+      border-top: 1px solid #e8f5e9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tarjeta-precio { font-size: 1rem; font-weight: 800; color: var(--primario); }
+    .tarjeta-codigo { font-size: 0.78rem; color: #9e9e9e; font-family: monospace; }
+
+    /* ── CATEGORÍA BADGE ── */
     .tarjeta-categoria {
       display: inline-block;
       padding: 3px 12px;
@@ -190,58 +204,12 @@
       font-weight: 600;
       align-self: flex-start;
     }
-    .cat-flores    { background: #fce4ec; color: #880e4f; }
-    .cat-tejidos   { background: #fff3e0; color: #e65100; }
-    .cat-otro      { background: #e8f5e9; color: #1b5e20; }
-
-    .tarjeta-fecha {
-      font-size: 0.78rem;
-      color: #9e9e9e;
-      margin-top: 4px;
-    }
-
-    .tarjeta-codigo {
-      font-size: 0.78rem;
-      color: #9e9e9e;
-      margin-top: 2px;
-      font-family: monospace;
-    }
-
-    .tarjeta-contactar {
-      display: none; /* oculto — descomentar cuando esté listo el enlace */
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #2e7d32;
-      text-decoration: none;
-      margin-top: 4px;
-    }
-    .tarjeta-contactar:hover { text-decoration: underline; }
-
-    /* ── SELECTOR COLUMNAS ── */
-    .col-selector {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-    .btn-col {
-      padding: 6px 16px;
-      font-size: 0.88rem;
-      border: 2px solid rgba(255,255,255,0.6);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.15);
-      color: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .btn-col:hover { background: rgba(255,255,255,0.30); }
-    .btn-col.activo {
-      background: white;
-      color: var(--primario);
-      border-color: white;
-    }
+    .cat-flores  { background: #fce4ec; color: #880e4f; }
+    .cat-plantas { background: #e8f5e9; color: #1b5e20; }
+    .cat-textil  { background: #fff3e0; color: #e65100; }
+    .cat-crochet { background: #fff8e1; color: #f57f17; }
+    .cat-varios  { background: #e8eaf6; color: #283593; }
+    .cat-otro    { background: #f5f5f5; color: #616161; }
 
     /* ── VACÍO / ERROR ── */
     .mensaje-central {
@@ -332,7 +300,7 @@
 
     .modal-foto {
       width: 100%;
-      max-height: 70vh;
+      max-height: 65vh;
       object-fit: contain;
       background: #111;
       display: block;
@@ -342,20 +310,51 @@
       padding: 16px 20px 20px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
     .modal-nombre { font-size: 1.3rem; font-weight: 700; color: #1b5e20; }
-    .modal-precio { font-size: 1.4rem; font-weight: 800; color: #2e7d32; }
+    .modal-precio { font-size: 1.35rem; font-weight: 800; color: #2e7d32; }
     .modal-cat    { font-size: 0.9rem; }
+
+    .modal-observaciones {
+      font-size: 0.95rem;
+      color: #444;
+      line-height: 1.6;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 10px;
+    }
+
+    .modal-contacto {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 9px 14px;
+      background: #e8f5e9;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1b5e20;
+      border: none;
+      text-align: left;
+      width: fit-content;
+      transition: background 0.2s;
+    }
+    .modal-contacto:hover { background: #c8e6c9; }
+    .modal-contacto .copiar-hint {
+      font-size: 0.78rem;
+      opacity: 0.65;
+      font-weight: 400;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       header h1 { font-size: 1.5rem; }
       .galeria { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
-      .tarjeta-nombre { font-size: 1rem; }
-      .tarjeta-precio { font-size: 1.1rem; }
-      .btn-filtro { padding: 8px 14px; font-size: 0.92rem; }
-      .modal-foto { max-height: 55vh; }
+      .tarjeta-nombre { font-size: 0.9rem; }
+      .tarjeta-precio-badge { font-size: 0.9rem; }
+      .btn-filtro { padding: 8px 12px; font-size: 0.88rem; }
+      .modal-foto { max-height: 50vh; }
     }
   </style>
 </head>
@@ -364,11 +363,6 @@
 <header>
   <h1>🌿 Catálogo de Jardín Alicia</h1>
   <p>Flores y tejidos artesanales</p>
-  <div class="col-selector">
-    <button class="btn-col" onclick="setColumnas(2, this)">2 por fila</button>
-    <button class="btn-col activo" onclick="setColumnas(4, this)">4 por fila</button>
-    <button class="btn-col" onclick="setColumnas(6, this)">6 por fila</button>
-  </div>
 </header>
 
 <div class="controles">
@@ -382,7 +376,10 @@
   <div class="filtros">
     <button class="btn-filtro activo" onclick="setFiltro('todos', this)">Todos</button>
     <button class="btn-filtro" onclick="setFiltro('Flores', this)">🌸 Flores</button>
-    <button class="btn-filtro" onclick="setFiltro('Tejidos', this)">🧶 Tejidos</button>
+    <button class="btn-filtro" onclick="setFiltro('Plantas', this)">🪴 Plantas</button>
+    <button class="btn-filtro" onclick="setFiltro('Textil', this)">🧵 Textil</button>
+    <button class="btn-filtro" onclick="setFiltro('Crochet', this)">🧶 Crochet</button>
+    <button class="btn-filtro" onclick="setFiltro('Varios', this)">· Varios</button>
   </div>
 </div>
 
@@ -401,6 +398,11 @@
       <div class="modal-nombre" id="modal-nombre"></div>
       <div class="modal-precio" id="modal-precio"></div>
       <span class="tarjeta-categoria modal-cat" id="modal-cat"></span>
+      <div class="modal-observaciones" id="modal-observaciones" style="display:none"></div>
+      <button class="modal-contacto" id="modal-contacto" style="display:none" onclick="copiarContacto()">
+        ☎️ <span id="modal-contacto-num"></span>
+        <span class="copiar-hint">toca para copiar</span>
+      </button>
     </div>
   </div>
 </div>
@@ -411,27 +413,33 @@
 
 <script>
   let todos = [];
-  let filtroActivo = 'todos';
+  let filtroActivo   = 'todos';
+  let contactoActual = '';
 
-  // ── Normaliza productos: soporta formato viejo y nuevo ──
   function normalizar(p) {
     const fotoVieja = p.foto || extraerNombreFoto(p.foto_path) || '';
     return {
-      id:         p.id         || 0,
-      nombre:     p.nombre     || p.descripcion || 'Sin nombre',
-      precio:     p.precio     || '—',
-      categoria:  normalizeCategoria(p.categoria || ''),
-      foto_thumb: p.foto_thumb || fotoVieja,   // miniatura (o única foto vieja)
-      foto_full:  p.foto_full  || fotoVieja,   // original (o única foto vieja)
-      fecha:      p.fecha      || '',
+      id:            p.id            || 0,
+      nombre:        p.nombre        || p.descripcion || 'Sin nombre',
+      precio:        p.precio        || '—',
+      categoria:     normalizeCategoria(p.categoria || ''),
+      observaciones: p.observaciones || '',
+      contacto:      p.contacto      || '',
+      foto_thumb:    p.foto_thumb    || fotoVieja,
+      foto_full:     p.foto_full     || fotoVieja,
+      fecha:         p.fecha         || '',
     };
   }
 
   function normalizeCategoria(cat) {
     const c = cat.toLowerCase();
-    if (c.includes('flor'))  return 'Flores';
-    if (c.includes('tejid')) return 'Tejidos';
-    return cat || 'Otro';
+    if (c.includes('flor'))    return 'Flores';
+    if (c.includes('plant'))   return 'Plantas';
+    if (c.includes('textil'))  return 'Textil';
+    if (c.includes('crochet')) return 'Crochet';
+    if (c.includes('tejid'))   return 'Crochet';
+    if (c.includes('vario'))   return 'Varios';
+    return cat || 'Varios';
   }
 
   function extraerNombreFoto(ruta) {
@@ -446,42 +454,65 @@
   }
 
   function claseCategoria(cat) {
-    if (cat === 'Flores')  return 'cat-flores';
-    if (cat === 'Tejidos') return 'cat-tejidos';
-    return 'cat-otro';
+    const m = { Flores:'cat-flores', Plantas:'cat-plantas', Textil:'cat-textil', Crochet:'cat-crochet', Varios:'cat-varios' };
+    return m[cat] || 'cat-otro';
   }
 
   function iconoCategoria(cat) {
-    if (cat === 'Flores')  return '🌸';
-    if (cat === 'Tejidos') return '🧶';
-    return '🌿';
-  }
-
-  function setColumnas(n, btn) {
-    document.getElementById('galeria').style.gridTemplateColumns = `repeat(${n}, 1fr)`;
-    document.querySelectorAll('.btn-col').forEach(b => b.classList.remove('activo'));
-    if (btn) btn.classList.add('activo');
+    const m = { Flores:'🌸', Plantas:'🪴', Textil:'🧵', Crochet:'🧶', Varios:'·' };
+    return m[cat] || '🌿';
   }
 
   // ── Modal ──
   function abrirModal(p) {
-    const src = p.foto_full ? `fotos/${p.foto_full}` : '';
-    document.getElementById('modal-foto').src    = src;
-    document.getElementById('modal-foto').alt    = p.nombre;
+    document.getElementById('modal-foto').src = p.foto_full ? `fotos/${p.foto_full}` : '';
+    document.getElementById('modal-foto').alt = p.nombre;
     document.getElementById('modal-nombre').textContent = p.nombre;
     document.getElementById('modal-precio').textContent = formatPrecio(p.precio);
+
     const catEl = document.getElementById('modal-cat');
-    catEl.textContent  = p.categoria;
-    catEl.className    = `tarjeta-categoria modal-cat ${claseCategoria(p.categoria)}`;
+    catEl.textContent = `${iconoCategoria(p.categoria)} ${p.categoria}`;
+    catEl.className   = `tarjeta-categoria modal-cat ${claseCategoria(p.categoria)}`;
+
+    const obsEl = document.getElementById('modal-observaciones');
+    if (p.observaciones) {
+      obsEl.textContent   = p.observaciones;
+      obsEl.style.display = 'block';
+    } else {
+      obsEl.style.display = 'none';
+    }
+
+    contactoActual = p.contacto || '';
+    const ctaEl = document.getElementById('modal-contacto');
+    const numEl = document.getElementById('modal-contacto-num');
+    if (contactoActual) {
+      numEl.textContent   = contactoActual;
+      ctaEl.style.display = 'flex';
+    } else {
+      ctaEl.style.display = 'none';
+    }
+
     document.getElementById('modal').classList.add('visible');
     document.body.style.overflow = 'hidden';
   }
 
   function cerrarModal(e) {
-    if (e && e.target !== document.getElementById('modal') && e.target.className !== 'modal-cerrar') return;
+    if (e && e.target !== document.getElementById('modal')) return;
     document.getElementById('modal').classList.remove('visible');
     document.getElementById('modal-foto').src = '';
     document.body.style.overflow = '';
+  }
+
+  function copiarContacto() {
+    if (!contactoActual) return;
+    navigator.clipboard.writeText(contactoActual).then(() => {
+      const btn = document.getElementById('modal-contacto');
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✅ Copiado';
+      setTimeout(() => { btn.innerHTML = prev; }, 1800);
+    }).catch(() => {
+      prompt('Número de contacto:', contactoActual);
+    });
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
@@ -518,12 +549,12 @@
         ? `<img class="tarjeta-foto" src="${thumb}" alt="${p.nombre}"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />`
         : '';
-      const placeholder = (!thumb)
+      const placeholder = !thumb
         ? `<div class="tarjeta-placeholder">🌿</div>`
         : `<div class="tarjeta-placeholder" style="display:none">🌿</div>`;
 
-      const codigoHtml = p.id
-        ? `<div class="tarjeta-codigo">Código: ${p.id}</div>`
+      const obsHtml = p.observaciones
+        ? `<div class="tarjeta-body"><p class="tarjeta-observaciones">${p.observaciones}</p></div>`
         : '';
 
       const tieneZoom = !!p.foto_full;
@@ -533,12 +564,14 @@
           <div class="tarjeta-imagen" ${tieneZoom ? `onclick="abrirModal(todos[${i}])" title="Toca para ver en grande"` : ''}>
             ${fotoHtml}${placeholder}
           </div>
-          <div class="tarjeta-info">
-            <div class="tarjeta-nombre">${p.nombre}</div>
-            <div class="tarjeta-precio">${formatPrecio(p.precio)}</div>
-            <span class="tarjeta-categoria ${claseCategoria(p.categoria)}">${iconoCategoria(p.categoria)} ${p.categoria}</span>
-            <a class="tarjeta-contactar" href="#" target="_blank">☎️ Contactar</a>
-            ${codigoHtml}
+          <div class="tarjeta-header">
+            <span class="tarjeta-nombre">${p.nombre}</span>
+            <span class="tarjeta-precio-badge">${formatPrecio(p.precio)}</span>
+          </div>
+          ${obsHtml}
+          <div class="tarjeta-footer">
+            <span class="tarjeta-precio">${formatPrecio(p.precio)}</span>
+            ${p.id ? `<span class="tarjeta-codigo">Cód: ${p.id}</span>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -568,14 +601,12 @@
       const res = await fetch('tema.json?t=' + Date.now());
       if (!res.ok) return;
       const data = await res.json();
-
       if (data.archivo) {
         document.body.style.backgroundImage = `url('fondos_precargados/${data.archivo}')`;
         document.body.classList.add('con-imagen');
-        console.log('Fondo aplicado:', data.fondo_actual);
       }
     } catch (e) {
-      console.log('tema.json no disponible, usando fondo por defecto');
+      console.log('tema.json no disponible');
     }
   }
 
