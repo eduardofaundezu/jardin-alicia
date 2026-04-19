@@ -511,7 +511,8 @@ async def cmd_fondos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "4️⃣ Invierno\n"
         "5️⃣ Día de Madres\n"
         "6️⃣ Fiestas Patrias\n"
-        "7️⃣ Navidad"
+        "7️⃣ Navidad\n"
+        "0️⃣ Salir (no cambiar)"
         f"{sugerencia}\n\n"
         "Escribe el número:"
     )
@@ -521,10 +522,15 @@ async def cmd_fondos(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def recibir_fondo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     entrada = update.message.text.strip()
+
+    if entrada == "0":
+        await update.message.reply_text("↩️ Fondo sin cambios.")
+        return ConversationHandler.END
+
     opcion  = TEMAS.get(entrada)
 
     if opcion is None:
-        await update.message.reply_text("❌ Número inválido. Escribe del 1 al 7.")
+        await update.message.reply_text("❌ Número inválido. Escribe del 0 al 7.")
         return FONDOS_ESPERAR
 
     try:

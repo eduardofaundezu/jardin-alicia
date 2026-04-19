@@ -657,8 +657,9 @@
       const items = p.observaciones
         ? p.observaciones.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
         : [];
+      const truncar = s => s.length > 60 ? s.slice(0, 60) + '…' : s;
       const obsHtml = items.length
-        ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${items.map(s => `<li>${s}</li>`).join('')}</ul></div>`
+        ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${items.map(s => `<li>${truncar(s)}</li>`).join('')}</ul></div>`
         : '';
 
       const tieneZoom = !!p.foto_full;
