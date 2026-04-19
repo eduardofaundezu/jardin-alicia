@@ -118,7 +118,7 @@
 
     /* ── TARJETA ── */
     .tarjeta {
-      background: white;
+      background: #faf8f4;
       border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 3px 12px rgba(0,0,0,0.10);
@@ -129,6 +129,26 @@
     .tarjeta:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* Badge circular con el código sobre la imagen */
+    .tarjeta-codigo-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--primario);
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.30);
+      z-index: 2;
+      pointer-events: none;
     }
 
     .tarjeta-foto {
@@ -149,48 +169,55 @@
       font-size: 3.5rem;
     }
 
-    /* Header verde: nombre + precio */
+    /* Header verde: solo nombre */
     .tarjeta-header {
       background: var(--primario);
       color: white;
       padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 8px;
     }
     .tarjeta-nombre {
       font-size: 1rem;
       font-weight: 700;
       line-height: 1.3;
-      flex: 1;
-    }
-    .tarjeta-precio-badge {
-      font-size: 1rem;
-      font-weight: 800;
-      white-space: nowrap;
-      opacity: 0.92;
     }
 
-    /* Cuerpo: observaciones */
+    /* Cuerpo: observaciones con bullets */
     .tarjeta-body {
       padding: 10px 14px;
-      border-top: 1px solid #e8f5e9;
+      border-top: 1px solid #ede9e0;
       flex: 1;
     }
     .tarjeta-observaciones {
-      font-size: 0.87rem;
-      color: #4a6741;
-      line-height: 1.55;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .tarjeta-observaciones li {
+      font-size: 0.85rem;
+      color: #5a5240;
+      line-height: 1.4;
+      padding-left: 14px;
+      position: relative;
+    }
+    .tarjeta-observaciones li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--secundario);
+      font-weight: 700;
     }
 
     /* Footer: precio + código */
     .tarjeta-footer {
       padding: 8px 14px;
-      border-top: 1px solid #e8f5e9;
+      border-top: 1px solid #ede9e0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #f5f2eb;
     }
     .tarjeta-precio { font-size: 1rem; font-weight: 800; color: var(--primario); }
     .tarjeta-codigo { font-size: 0.78rem; color: #9e9e9e; font-family: monospace; }
@@ -553,8 +580,15 @@
         ? `<div class="tarjeta-placeholder">🌿</div>`
         : `<div class="tarjeta-placeholder" style="display:none">🌿</div>`;
 
-      const obsHtml = p.observaciones
-        ? `<div class="tarjeta-body"><p class="tarjeta-observaciones">${p.observaciones}</p></div>`
+      const items = p.observaciones
+        ? p.observaciones.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+        : [];
+      const obsHtml = items.length
+        ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${items.map(s => `<li>${s}</li>`).join('')}</ul></div>`
+        : '';
+
+      const codigoBadge = p.id
+        ? `<div class="tarjeta-codigo-badge">${p.id}</div>`
         : '';
 
       const tieneZoom = !!p.foto_full;
@@ -562,16 +596,15 @@
       return `
         <div class="tarjeta">
           <div class="tarjeta-imagen" ${tieneZoom ? `onclick="abrirModal(todos[${i}])" title="Toca para ver en grande"` : ''}>
-            ${fotoHtml}${placeholder}
+            ${codigoBadge}${fotoHtml}${placeholder}
           </div>
           <div class="tarjeta-header">
             <span class="tarjeta-nombre">${p.nombre}</span>
-            <span class="tarjeta-precio-badge">${formatPrecio(p.precio)}</span>
           </div>
           ${obsHtml}
           <div class="tarjeta-footer">
             <span class="tarjeta-precio">${formatPrecio(p.precio)}</span>
-            ${p.id ? `<span class="tarjeta-codigo">Cód: ${p.id}</span>` : ''}
+            ${p.id ? `<span class="tarjeta-codigo">Código: ${p.id}</span>` : ''}
           </div>
         </div>`;
     }).join('');
