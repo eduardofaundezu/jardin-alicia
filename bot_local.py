@@ -18,9 +18,13 @@ from telegram.ext import (
 load_dotenv()
 
 BOT_TOKEN        = os.getenv("BOT_TOKEN")
-BOT_TOKEN_MAMA   = os.getenv("BOT_TOKEN_MAMA")
 CONTACTO_EDUARDO = os.getenv("CONTACTO_EDUARDO", "")
-CONTACTO_MAMA    = os.getenv("CONTACTO_MAMA", "")
+
+# ── Bot de mamá desactivado temporalmente (token 401) ────────
+# Para reactivar, descomentar las dos líneas siguientes
+# y restaurar el bloque "if BOT_TOKEN_MAMA" en run_bots():
+# BOT_TOKEN_MAMA = os.getenv("BOT_TOKEN_MAMA")
+# CONTACTO_MAMA  = os.getenv("CONTACTO_MAMA", "")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -553,12 +557,13 @@ async def run_bots():
         apps.append(crear_app(BOT_TOKEN, CONTACTO_EDUARDO))
         print(f"Bot Eduardo listo (contacto: {CONTACTO_EDUARDO or 'no configurado'})")
 
-    if BOT_TOKEN_MAMA:
-        apps.append(crear_app(BOT_TOKEN_MAMA, CONTACTO_MAMA))
-        print(f"Bot Mamá listo (contacto: {CONTACTO_MAMA or 'no configurado'})")
+    # ── Para agregar el bot de mamá cuando el token esté listo: ──
+    # if BOT_TOKEN_MAMA:
+    #     apps.append(crear_app(BOT_TOKEN_MAMA, CONTACTO_MAMA))
+    #     print(f"Bot Mamá listo (contacto: {CONTACTO_MAMA or 'no configurado'})")
 
     if not apps:
-        print("ERROR: No hay tokens configurados (BOT_TOKEN / BOT_TOKEN_MAMA)")
+        print("ERROR: No hay tokens configurados (BOT_TOKEN)")
         return
 
     for app in apps:
