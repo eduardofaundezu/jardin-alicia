@@ -20,11 +20,8 @@ load_dotenv()
 BOT_TOKEN        = os.getenv("BOT_TOKEN")
 CONTACTO_EDUARDO = os.getenv("CONTACTO_EDUARDO", "")
 
-# ── Bot de mamá desactivado temporalmente (token 401) ────────
-# Para reactivar, descomentar las dos líneas siguientes
-# y restaurar el bloque "if BOT_TOKEN_MAMA" en run_bots():
-# BOT_TOKEN_MAMA = os.getenv("BOT_TOKEN_MAMA")
-# CONTACTO_MAMA  = os.getenv("CONTACTO_MAMA", "")
+BOT_TOKEN_MAMA = os.getenv("BOT_TOKEN_MAMA")
+CONTACTO_MAMA  = os.getenv("CONTACTO_MAMA", "")
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -215,6 +212,19 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ── Flujo principal: agregar producto ────────────────────────
 async def recibir_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Rechazar álbumes: Telegram envía cada foto del álbum como mensaje separado
+    # con el mismo media_group_id. Solo mostramos aviso para la primera y
+    # silenciamos las siguientes para no spamear.
+    if update.message.media_group_id:
+        mgid = update.message.media_group_id
+        if context.user_data.get("_mgid_portada") == mgid:
+            return ESPERANDO_FOTO  # duplicado silencioso del mismo álbum
+        context.user_data["_mgid_portada"] = mgid
+        await update.message.reply_text(
+            "⚠️ Envía las fotos de una en una, no como álbum.\n"
+            "Intenta de nuevo con una sola foto."
+        )
+        return ESPERANDO_FOTO
     print("DEBUG: Foto portada recibida")
     try:
         os.makedirs("fotos", exist_ok=True)
@@ -256,6 +266,16 @@ async def texto_en_espera_fotos_extra(update: Update, context: ContextTypes.DEFA
 
 
 async def recibir_fotos_extra(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.media_group_id:
+        mgid = update.message.media_group_id
+        if context.user_data.get("_mgid_extra") == mgid:
+            return ESPERANDO_FOTOS_EXTRA
+        context.user_data["_mgid_extra"] = mgid
+        await update.message.reply_text(
+            "⚠️ Envía las fotos de una en una, no como álbum.\n"
+            "Intenta de nuevo con una sola foto."
+        )
+        return ESPERANDO_FOTOS_EXTRA
     fotos_extra = context.user_data.get("fotos_extra", [])
     fotos_total = context.user_data.get("fotos_total", 1)
     indice      = len(fotos_extra) + 1
@@ -679,10 +699,11 @@ async def run_bots():
         apps.append(crear_app(BOT_TOKEN, CONTACTO_EDUARDO))
         print(f"Bot Eduardo listo (contacto: {CONTACTO_EDUARDO or 'no configurado'})")
 
-    # ── Para agregar el bot de mamá cuando el token esté listo: ──
-    # if BOT_TOKEN_MAMA:
-    #     apps.append(crear_app(BOT_TOKEN_MAMA, CONTACTO_MAMA))
-    #     print(f"Bot Mamá listo (contacto: {CONTACTO_MAMA or 'no configurado'})")
+    if BOT_TOKEN_MAMA:
+        apps.append(crear_app(BOT_TOKEN_MAMA, CONTACTO_MAMA))
+        print(f"Bot Mamá listo (contacto: {CONTACTO_MAMA or 'no configurado'})")
+    else:
+        print("INFO: BOT_TOKEN_MAMA no configurado, bot mamá desactivado")
 
     if not apps:
         print("ERROR: No hay tokens configurados (BOT_TOKEN)")
