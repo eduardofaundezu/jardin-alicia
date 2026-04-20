@@ -240,9 +240,12 @@ async def recibir_foto(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     fotos_total = context.user_data.get("fotos_total", 1)
     if fotos_total > 1:
+        restantes = fotos_total - 1
+        plural = "foto" if restantes == 1 else "fotos"
         await update.message.reply_text(
-            f"✓ Portada guardada\n"
-            f"Envía foto 2 de {fotos_total}"
+            f"✓ Portada guardada\n\n"
+            f"Ahora envía las {restantes} {plural} restantes\n"
+            f"(puedes enviarlas todas juntas como álbum)"
         )
         return ESPERANDO_FOTOS_EXTRA
 
@@ -258,24 +261,17 @@ async def texto_en_espera_foto(update: Update, context: ContextTypes.DEFAULT_TYP
 async def texto_en_espera_fotos_extra(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fotos_extra = context.user_data.get("fotos_extra", [])
     fotos_total = context.user_data.get("fotos_total", 1)
-    siguiente   = 1 + len(fotos_extra) + 1
+    recibidas   = 1 + len(fotos_extra)
+    restantes   = fotos_total - recibidas
     await update.message.reply_text(
-        f"Por favor envía una foto (foto {siguiente} de {fotos_total})"
+        f"Faltan {restantes} foto(s). Envíalas como foto o álbum."
     )
     return ESPERANDO_FOTOS_EXTRA
 
 
 async def recibir_fotos_extra(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message.media_group_id:
-        mgid = update.message.media_group_id
-        if context.user_data.get("_mgid_extra") == mgid:
-            return ESPERANDO_FOTOS_EXTRA
-        context.user_data["_mgid_extra"] = mgid
-        await update.message.reply_text(
-            "⚠️ Envía las fotos de una en una, no como álbum.\n"
-            "Intenta de nuevo con una sola foto."
-        )
-        return ESPERANDO_FOTOS_EXTRA
+    # Los álbumes son bienvenidos aquí: Telegram envía cada foto del álbum
+    # como mensaje separado; la lógica de conteo las procesa en orden.
     fotos_extra = context.user_data.get("fotos_extra", [])
     fotos_total = context.user_data.get("fotos_total", 1)
     indice      = len(fotos_extra) + 1
