@@ -50,13 +50,11 @@ MAPA_CATEGORIAS = {
 }
 
 TEMAS = {
-    "1": {"nombre": "Primavera",       "fondo": "primavera"},
-    "2": {"nombre": "Verano",          "fondo": "verano"},
-    "3": {"nombre": "Otoño",           "fondo": "otono"},
-    "4": {"nombre": "Invierno",        "fondo": "invierno"},
-    "5": {"nombre": "Día de Madres",   "fondo": "madre"},
-    "6": {"nombre": "Fiestas Patrias", "fondo": "patrias"},
-    "7": {"nombre": "Navidad",         "fondo": "navidad"},
+    "1": {"nombre": "Verano",          "fondo": "verano"},
+    "2": {"nombre": "Otoño",           "fondo": "otono"},
+    "3": {"nombre": "Invierno",        "fondo": "invierno"},
+    "4": {"nombre": "Fiestas Patrias", "fondo": "patrias"},
+    "5": {"nombre": "Navidad",         "fondo": "navidad"},
 }
 
 
@@ -64,19 +62,17 @@ def sugerir_fondo():
     mes = datetime.now().month
     dia = datetime.now().day
     if mes == 12:
-        return "7 (Navidad)"
+        return "5 (Navidad)"
     if mes in (1, 2, 3):
-        return "2 (Verano)"
+        return "1 (Verano)"
     if mes == 4 or (mes == 5 and dia < 10):
-        return "3 (Otoño)"
-    if mes == 5:
-        return "5 (Día de Madres)"
+        return "2 (Otoño)"
     if mes in (6, 7, 8):
-        return "4 (Invierno)"
+        return "3 (Invierno)"
     if mes == 9 and 15 <= dia <= 20:
-        return "6 (Fiestas Patrias)"
+        return "4 (Fiestas Patrias)"
     if mes in (9, 10, 11):
-        return "1 (Primavera)"
+        return "1 (Verano)"
     return ""
 
 
@@ -521,13 +517,11 @@ async def cmd_fondos(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sugerencia = f"\n\nSugerencia: {sugerido}" if sugerido else ""
     texto = (
         "Elige un fondo para la galería:\n\n"
-        "1️⃣ Primavera\n"
-        "2️⃣ Verano\n"
-        "3️⃣ Otoño\n"
-        "4️⃣ Invierno\n"
-        "5️⃣ Día de Madres\n"
-        "6️⃣ Fiestas Patrias\n"
-        "7️⃣ Navidad\n"
+        "1️⃣ Verano\n"
+        "2️⃣ Otoño\n"
+        "3️⃣ Invierno\n"
+        "4️⃣ Fiestas Patrias\n"
+        "5️⃣ Navidad\n"
         "0️⃣ Salir (no cambiar)"
         f"{sugerencia}\n\n"
         "Escribe el número:"
@@ -546,7 +540,7 @@ async def recibir_fondo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     opcion  = TEMAS.get(entrada)
 
     if opcion is None:
-        await update.message.reply_text("❌ Número inválido. Escribe del 0 al 7.")
+        await update.message.reply_text("❌ Número inválido. Escribe del 0 al 5.")
         return FONDOS_ESPERAR
 
     try:

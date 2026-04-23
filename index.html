@@ -190,6 +190,11 @@
       color: var(--secundario);
       font-weight: 700;
     }
+    .tarjeta-observaciones li.obs-mas {
+      color: var(--primario);
+      font-style: italic;
+      font-weight: 600;
+    }
 
     /* Footer: precio + código */
     .tarjeta-footer {
@@ -572,6 +577,7 @@
 
     const obsEl = document.getElementById('modal-observaciones');
     if (p.observaciones) {
+      // Mostrar texto COMPLETO en modal (sin truncar)
       obsEl.textContent   = p.observaciones;
       obsEl.style.display = 'block';
     } else {
@@ -657,9 +663,12 @@
       const items = p.observaciones
         ? p.observaciones.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
         : [];
-      const truncar = s => s.length > 60 ? s.slice(0, 60) + '…' : s;
+      // Truncar a máximo 3 líneas
+      const maxLineas = 3;
+      const itemsVisibles = items.slice(0, maxLineas);
+      const excede = items.length > maxLineas;
       const obsHtml = items.length
-        ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${items.map(s => `<li>${truncar(s)}</li>`).join('')}</ul></div>`
+        ? `<div class="tarjeta-body"><ul class="tarjeta-observaciones">${itemsVisibles.map(s => `<li>${s.length > 60 ? s.slice(0, 60) + '…' : s}</li>`).join('')}${excede ? '<li class="obs-mas">... más</li>' : ''}</ul></div>`
         : '';
 
       const tieneZoom = !!p.foto_full;
