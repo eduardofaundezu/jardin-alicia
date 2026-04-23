@@ -108,9 +108,22 @@ def reasignar_ids(productos):
 
 
 def guardar_tema(opcion):
+    # Detectar extensión real del archivo en fondos_precargados
+    fondo_nombre = opcion["fondo"]
+    extensions = ['.avif', '.png', '.jpg', '.jpeg', '.webp']
+    archivo_encontrado = None
+    for ext in extensions:
+        ruta = f"fondos_precargados/{fondo_nombre}{ext}"
+        if os.path.exists(ruta):
+            archivo_encontrado = f"{fondo_nombre}{ext}"
+            break
+    
+    if archivo_encontrado is None:
+        archivo_encontrado = f"{fondo_nombre}.jpg"  # fallback
+    
     data = {
-        "fondo_actual": opcion["fondo"],
-        "archivo": f"{opcion['fondo']}.jpg",
+        "fondo_actual": fondo_nombre,
+        "archivo": archivo_encontrado,
     }
     with open("tema.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
