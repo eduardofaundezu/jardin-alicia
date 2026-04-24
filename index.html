@@ -11,6 +11,70 @@
       --primario:  #2e7d32;
       --secundario:#66bb6a;
       --texto:     #1b5e20;
+      /* Variables de tema dinámico */
+      --color-badge: #2e7d32;
+      --color-precio: #1b5e20;
+      --color-btn-activo: #2e7d32;
+      --color-pill-bg: #a5d6a7;
+      --color-pill-text: #1b5e20;
+      --color-search-border: #a5d6a7;
+      --icono-header: "🌿";
+    }
+
+    /* ── TEMAS DINÁMICOS ── */
+    body.tema-verano {
+      --color-badge: #F59E0B;
+      --color-precio: #78350F;
+      --color-btn-activo: #0284C7;
+      --color-pill-bg: #FED7AA;
+      --color-pill-text: #7C2D12;
+      --color-search-border: #FBBF24;
+      --icono-header: "☀️";
+    }
+    body.tema-otono {
+      --color-badge: #C2410C;
+      --color-precio: #431407;
+      --color-btn-activo: #B45309;
+      --color-pill-bg: #FFEDD5;
+      --color-pill-text: #7C2D12;
+      --color-search-border: #C2410C;
+      --icono-header: "🍂";
+    }
+    body.tema-invierno {
+      --color-badge: #0369A1;
+      --color-precio: #082F49;
+      --color-btn-activo: #0369A1;
+      --color-pill-bg: #BAE6FD;
+      --color-pill-text: #0C4A6E;
+      --color-search-border: #0284C7;
+      --icono-header: "❄️";
+    }
+    body.tema-navidad {
+      --color-badge: #16A34A;
+      --color-precio: #052E16;
+      --color-btn-activo: #DC2626;
+      --color-pill-bg: #BBF7D0;
+      --color-pill-text: #14532D;
+      --color-search-border: #16A34A;
+      --icono-header: "🎄";
+    }
+    body.tema-patrias {
+      --color-badge: #DC2626;
+      --color-precio: #450A0A;
+      --color-btn-activo: #1D4ED8;
+      --color-pill-bg: #FCA5A5;
+      --color-pill-text: #7F1D1D;
+      --color-search-border: #DC2626;
+      --icono-header: "🇨🇱";
+    }
+    body.tema-madre {
+      --color-badge: #DB2777;
+      --color-precio: #500724;
+      --color-btn-activo: #7C3AED;
+      --color-pill-bg: #FBCFE8;
+      --color-pill-text: #831843;
+      --color-search-border: #DB2777;
+      --icono-header: "💐";
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,33 +132,33 @@
       min-width: 200px;
       padding: 12px 16px;
       font-size: 1.05rem;
-      border: 2px solid #a5d6a7;
+      border: 2px solid var(--color-search-border);
       border-radius: 10px;
       outline: none;
       background: white;
       color: #2d4a2d;
       transition: border-color 0.2s;
     }
-    .buscador:focus { border-color: var(--primario); }
+    .buscador:focus { border-color: var(--color-btn-activo); }
 
     .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .btn-filtro {
       padding: 10px 18px;
       font-size: 0.95rem;
-      border: 2px solid var(--secundario);
+      border: 2px solid var(--color-pill-text);
       border-radius: 10px;
-      background: white;
-      color: var(--primario);
+      background: var(--color-pill-bg);
+      color: var(--color-pill-text);
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
     }
     .btn-filtro:hover { opacity: 0.85; }
     .btn-filtro.activo {
-      background: var(--primario);
+      background: var(--color-btn-activo);
       color: white;
-      border-color: var(--primario);
+      border-color: var(--color-btn-activo);
     }
 
     /* ── CONTADOR ── */
@@ -152,7 +216,7 @@
 
     /* Header verde: solo nombre */
     .tarjeta-header {
-      background: var(--primario);
+      background: var(--color-badge);
       color: white;
       padding: 10px 14px;
     }
@@ -205,7 +269,7 @@
       align-items: center;
       background: #f5f2eb;
     }
-    .tarjeta-precio { font-size: 1rem; font-weight: 800; color: var(--primario); }
+    .tarjeta-precio { font-size: 1rem; font-weight: 800; color: var(--color-precio); }
     .tarjeta-codigo { font-size: 0.78rem; color: #9e9e9e; font-family: monospace; }
 
     /* ── CATEGORÍA BADGE ── */
@@ -414,7 +478,7 @@
 <body>
 
 <header>
-  <h1>🌿 Catálogo de Jardín Alicia</h1>
+  <h1><span id="header-icono">🌿</span> Catálogo de Jardín Alicia</h1>
   <p>Flores y tejidos artesanales</p>
 </header>
 
@@ -708,16 +772,26 @@
     filtrar();
   }
 
-  // ── Carga y aplica el fondo ──
+  // ── Carga y aplica el fondo + tema visual ──
   async function cargarTema() {
     try {
       const res = await fetch('tema.json?t=' + Date.now());
       if (!res.ok) return;
       const data = await res.json();
+
+      const fondosValidos = ['verano', 'otono', 'invierno', 'navidad', 'patrias', 'madre'];
+      const fondo = data.fondo_actual || '';
+      const clases = fondosValidos.includes(fondo) ? [`tema-${fondo}`] : [];
+
       if (data.archivo) {
         document.body.style.backgroundImage = `url('fondos_precargados/${data.archivo}')`;
-        document.body.classList.add('con-imagen');
+        clases.push('con-imagen');
       }
+      document.body.className = clases.join(' ');
+
+      const iconos = { verano: '☀️', otono: '🍂', invierno: '❄️', navidad: '🎄', patrias: '🇨🇱', madre: '💐' };
+      const icono = document.getElementById('header-icono');
+      if (icono) icono.textContent = iconos[fondo] || '🌿';
     } catch (e) {
       console.log('tema.json no disponible');
     }
